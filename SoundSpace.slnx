@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="../../../../../../../../duan/SoundSpace/backend/SoundSpace.Api/SoundSpace.Api.csproj" />
+  <Project Path="../../../../../../../../duan/SoundSpace/backend/SoundSpace.Core/SoundSpace.Core.csproj" />
+  <Project Path="../../../../../../../../duan/SoundSpace/backend/SoundSpace.Data/SoundSpace.Data.csproj" Id="e8f05131-ca2b-4efe-88ee-c5d4ccd79742" />
+</Solution>
