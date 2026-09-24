@@ -1,0 +1,128 @@
+@let track = player.currentTrack();
+
+<!-- Track info -->
+<div class="flex min-w-0 items-center gap-4 md:w-1/4">
+  <div
+    class="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-linear-to-br from-inverse-primary to-secondary-container"
+  >
+    @if (track?.coverUrl) {
+      <img [src]="track!.coverUrl" alt="" class="h-full w-full object-cover" />
+    } @else {
+      <span class="material-symbols-outlined text-on-primary-fixed" aria-hidden="true"
+        >music_note</span
+      >
+    }
+  </div>
+
+  @if (track) {
+    <div class="min-w-0">
+      <div class="truncate font-headline-sm text-on-surface">{{ track.title }}</div>
+      <div class="truncate text-body-sm text-outline">{{ track.artist }}</div>
+    </div>
+    <button
+      type="button"
+      class="ml-2 hidden text-outline transition-colors hover:text-primary sm:block"
+      aria-label="Thêm vào Yêu thích"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">favorite</span>
+    </button>
+  } @else {
+    <div class="text-body-sm text-outline">Chưa phát bài nào</div>
+  }
+</div>
+
+<!-- Controls + progress -->
+<div class="flex flex-1 flex-col items-center gap-2 md:w-2/4 md:max-w-xl md:flex-none">
+  <div class="flex items-center gap-4 sm:gap-6">
+    <button
+      type="button"
+      class="hidden transition-colors sm:block"
+      [class]="player.shuffle() ? 'text-secondary' : 'text-outline hover:text-on-surface'"
+      aria-label="Trộn bài"
+      [attr.aria-pressed]="player.shuffle()"
+      (click)="player.toggleShuffle()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">shuffle</span>
+    </button>
+    <button
+      type="button"
+      class="text-outline transition-colors hover:text-on-surface"
+      aria-label="Bài trước"
+      (click)="player.previous()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">skip_previous</span>
+    </button>
+    <button
+      type="button"
+      class="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_0_12px_rgba(208,188,255,0.4)] transition-transform hover:scale-105 disabled:opacity-50"
+      [attr.aria-label]="player.isPlaying() ? 'Tạm dừng' : 'Phát'"
+      [disabled]="!track"
+      (click)="player.togglePlay()"
+    >
+      <span class="material-symbols-outlined icon-filled" aria-hidden="true">
+        {{ player.isPlaying() ? 'pause' : 'play_arrow' }}
+      </span>
+    </button>
+    <button
+      type="button"
+      class="text-outline transition-colors hover:text-on-surface"
+      aria-label="Bài tiếp theo"
+      (click)="player.next()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">skip_next</span>
+    </button>
+    <button
+      type="button"
+      class="hidden transition-colors sm:block"
+      [class]="player.repeat() === 'off' ? 'text-outline hover:text-on-surface' : 'text-secondary'"
+      [attr.aria-label]="repeatLabel()"
+      (click)="player.cycleRepeat()"
+    >
+      <span class="material-symbols-outlined" aria-hidden="true">
+        {{ player.repeat() === 'one' ? 'repeat_one' : 'repeat' }}
+      </span>
+    </button>
+  </div>
+
+  <div class="flex w-full items-center gap-3">
+    <span class="w-10 text-right text-body-sm text-outline tabular-nums">{{
+      formatDuration(player.position())
+    }}</span>
+    <input
+      type="range"
+      class="h-1 flex-1 cursor-pointer accent-secondary"
+      min="0"
+      [max]="player.duration()"
+      [value]="player.position()"
+      aria-label="Vị trí phát"
+      [attr.aria-valuetext]="
+        formatDuration(player.position()) + ' / ' + formatDuration(player.duration())
+      "
+      (input)="player.seek(+$any($event.target).value)"
+    />
+    <span class="w-10 text-body-sm text-outline tabular-nums">{{
+      formatDuration(player.duration())
+    }}</span>
+  </div>
+</div>
+
+<!-- Volume -->
+<div class="hidden items-center justify-end gap-3 md:flex md:w-1/4">
+  <button
+    type="button"
+    class="text-outline transition-colors hover:text-on-surface"
+    [attr.aria-label]="player.muted() ? 'Bật tiếng' : 'Tắt tiếng'"
+    (click)="player.toggleMute()"
+  >
+    <span class="material-symbols-outlined" aria-hidden="true">{{ volumeIcon() }}</span>
+  </button>
+  <input
+    type="range"
+    class="h-1 w-24 cursor-pointer accent-on-surface"
+    min="0"
+    max="100"
+    [value]="player.muted() ? 0 : player.volume() * 100"
+    aria-label="Âm lượng"
+    (input)="player.setVolume(+$any($event.target).value / 100)"
+  />
+</div>
