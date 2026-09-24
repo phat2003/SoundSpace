@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="frontend/soundspace-web/public/logo-mark.png" alt="SoundSpace logo" width="96" height="96" />
+  <img src="frontend/public/logo-mark.png" alt="SoundSpace logo" width="96" height="96" />
 </p>
 
 <h1 align="center">SoundSpace</h1>
@@ -81,14 +81,13 @@ SoundSpace/
 │   ├── SoundSpace.Api/          # Web API
 │   ├── SoundSpace.Core/         # Domain, interface, model
 │   └── SoundSpace.Data/         # EF Core, repository
-├── frontend/
-│   └── soundspace-web/          # Angular app
-│       └── src/app/
-│           ├── core/            # service dùng chung: player, auth, API client
-│           ├── layout/          # shell, sidebar, header, player-bar
-│           ├── shared/          # component và hàm tiện ích dùng lại
-│           ├── features/        # mỗi trang một thư mục (explore, library, admin…)
-│           └── app.routes.ts
+├── frontend/                    # Angular app
+│   └── src/app/
+│       ├── core/                # service dùng chung: player, auth, API client
+│       ├── layout/              # shell, sidebar, header, player-bar
+│       ├── shared/              # component và hàm tiện ích dùng lại
+│       ├── features/            # mỗi trang một thư mục (explore, library, admin…)
+│       └── app.routes.ts
 ├── SoundSpace.slnx
 └── README.md
 ```
@@ -123,7 +122,7 @@ Chuỗi kết nối PostgreSQL và cấu hình Firebase, JWT sẽ nằm trong `a
 ### Frontend
 
 ```bash
-cd frontend/soundspace-web
+cd frontend
 npm install
 npm start
 ```
@@ -140,7 +139,7 @@ npm test
 
 ## Giao diện
 
-Giao diện được thiết kế bằng Google Stitch: tông tối, điểm nhấn tím neon `#d0bcff` và xanh cyan `#4cd7f6`, font **Sora** cho tiêu đề và **Plus Jakarta Sans** cho nội dung. Bảng màu, font và khoảng cách được khai báo thành token Tailwind trong [`src/styles.css`](frontend/soundspace-web/src/styles.css), nên có thể dùng trực tiếp các class như `bg-surface-container-low`, `text-primary`, `px-space-lg`.
+Giao diện được thiết kế bằng Google Stitch: tông tối, điểm nhấn tím neon `#d0bcff` và xanh cyan `#4cd7f6`, font **Sora** cho tiêu đề và **Plus Jakarta Sans** cho nội dung. Bảng màu, font và khoảng cách được khai báo thành token Tailwind trong [`src/styles.css`](frontend/src/styles.css), nên có thể dùng trực tiếp các class như `bg-surface-container-low`, `text-primary`, `px-space-lg`.
 
 ## Lộ trình
 
