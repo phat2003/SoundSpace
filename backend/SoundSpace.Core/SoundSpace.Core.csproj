@@ -13,4 +13,8 @@
     <Folder Include="SeedWorks\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.31" />
+  </ItemGroup>
+
 </Project>
