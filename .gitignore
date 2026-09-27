@@ -361,3 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Cấu hình thật (chứa chuỗi kết nối, mật khẩu) - không commit.
+# Tạo từ appsettingsexample*.json
+backend/SoundSpace.Api/appsettings.json
+backend/SoundSpace.Api/appsettings.Development.json
