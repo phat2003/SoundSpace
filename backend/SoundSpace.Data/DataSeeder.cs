@@ -30,7 +30,7 @@ namespace SoundSpace.Data
                     Id = userId,
                     FullName = "Phat",
                     Email = "jinluke@gmail.com",
-                    NormalizedEmail = "jinluke@gmail.com",
+                    NormalizedEmail = "JINLUKE@GMAIL.COM",
                     UserName = "admin",
                     NormalizedUserName = "ADMIN",
                     IsActive = true,
