@@ -1,52 +1,58 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using SoundSpace.Core.Domain.Identity;
+using SoundSpace.Core.SeedWorks.Constants;
 
 namespace SoundSpace.Data
 {
-    public class DataSeeder
+    public static class DataSeeder
     {
-        public async Task SeedAsync(ApplicationDbContext context)
+        public static async Task SeedAsync(UserManager<AppUser> userManager, RoleManager<AppRole> roleManager)
         {
-            var passwordHasher = new PasswordHasher<AppUser>();
+            await SeedRoleAsync(roleManager, Roles.Admin, "Quản trị viên");
+            await SeedRoleAsync(roleManager, Roles.User, "Người dùng");
 
-            var rootAdminRoleId = Guid.NewGuid();
-            if (!context.Roles.Any())
+            // Tài khoản test: admin không bị khoá khi nhập sai mật khẩu, user giữ cơ chế khoá mặc định.
+            await SeedUserAsync(userManager, "Phat", "admin", "jinluke@gmail.com", "Admin@123$", Roles.Admin, lockoutEnabled: false);
+            await SeedUserAsync(userManager, "Người dùng test", "user", "user@soundspace.local", "User@123$", Roles.User, lockoutEnabled: true);
+        }
+
+        private static async Task SeedRoleAsync(RoleManager<AppRole> roleManager, string name, string displayName)
+        {
+            if (await roleManager.RoleExistsAsync(name))
             {
-                await context.Roles.AddAsync(new AppRole()
-                {
-                    Id = rootAdminRoleId,
-                    Name = "Admin",
-                    NormalizedName = "ADMIN",
-                    DisplayName = "Quản trị viên"
-                });
-                await context.SaveChangesAsync();
+                return;
             }
 
-            if (!context.Users.Any())
-            {
-                var userId = Guid.NewGuid();
-                var user = new AppUser()
-                {
-                    Id = userId,
-                    FullName = "Phat",
-                    Email = "jinluke@gmail.com",
-                    NormalizedEmail = "JINLUKE@GMAIL.COM",
-                    UserName = "admin",
-                    NormalizedUserName = "ADMIN",
-                    IsActive = true,
-                    SecurityStamp = Guid.NewGuid().ToString(),
-                    LockoutEnabled = false,
-                    DateCreated = DateTime.Now
-                };
-                user.PasswordHash = passwordHasher.HashPassword(user, "Admin@123$");
-                await context.Users.AddAsync(user);
+            EnsureSucceeded(await roleManager.CreateAsync(new AppRole { Name = name, DisplayName = displayName }));
+        }
 
-                await context.UserRoles.AddAsync(new IdentityUserRole<Guid>()
-                {
-                    RoleId = rootAdminRoleId,
-                    UserId = userId,
-                });
-                await context.SaveChangesAsync();
+        private static async Task SeedUserAsync(UserManager<AppUser> userManager, string fullName, string userName,
+            string email, string password, string role, bool lockoutEnabled)
+        {
+            if (await userManager.FindByNameAsync(userName) != null)
+            {
+                return;
+            }
+
+            // UserManager tự hash mật khẩu, chuẩn hoá UserName/Email và tạo SecurityStamp.
+            var user = new AppUser
+            {
+                FullName = fullName,
+                UserName = userName,
+                Email = email,
+                IsActive = true
+            };
+            EnsureSucceeded(await userManager.CreateAsync(user, password));
+            EnsureSucceeded(await userManager.SetLockoutEnabledAsync(user, lockoutEnabled));
+            EnsureSucceeded(await userManager.AddToRoleAsync(user, role));
+        }
+
+        private static void EnsureSucceeded(IdentityResult result)
+        {
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException(
+                    "Seed dữ liệu thất bại: " + string.Join("; ", result.Errors.Select(e => e.Description)));
             }
         }
     }

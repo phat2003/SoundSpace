@@ -59,6 +59,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 //seed database
-app.MigrateDatabase();
+await app.MigrateDatabaseAsync();
 
 app.Run();
