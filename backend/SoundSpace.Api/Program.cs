@@ -1,8 +1,14 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SoundSpace.Api;
+using SoundSpace.Api.Services;
+using SoundSpace.Core.ConfigOptions;
 using SoundSpace.Core.Domain.Identity;
+using SoundSpace.Core.Models.Auth;
 using SoundSpace.Data;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -14,7 +20,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseNpgsql(connectionString));
 
 builder.Services.AddIdentity<AppUser, AppRole>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddErrorDescriber<VietnameseIdentityErrorDescriber>(); // Thông báo lỗi Identity bằng tiếng Việt
 
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -23,7 +30,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireLowercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
-    options.Password.RequiredLength = 6;
+    options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
 
     // Lockout settings.
@@ -34,7 +41,38 @@ builder.Services.Configure<IdentityOptions>(options =>
     // User settings.
     options.User.AllowedUserNameCharacters =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
-    options.User.RequireUniqueEmail = false;
+    options.User.RequireUniqueEmail = true; // Đăng nhập bằng email nên email không được trùng
+});
+
+// AutoMapper: quét các Profile nằm trong project Core (ví dụ RegisterRequest.AutoMapperProfiles)
+builder.Services.AddAutoMapper(typeof(RegisterRequest));
+
+//Authen and author
+builder.Services.Configure<JwtTokenSettings>(configuration.GetSection("JwtTokenSettings"));
+builder.Services.AddScoped<ITokenService, TokenService>();
+
+// Báo lỗi ngay khi khởi động nếu quên cấu hình khoá JWT (HMAC-SHA256 cần khoá ≥ 32 byte).
+var jwtKey = configuration["JwtTokenSettings:Key"];
+if (string.IsNullOrEmpty(jwtKey) || jwtKey.Length < 32)
+{
+    throw new InvalidOperationException("Chưa cấu hình JwtTokenSettings:Key (tối thiểu 32 ký tự) trong appsettings hoặc biến môi trường.");
+}
+
+// Đặt JWT làm scheme mặc định (AddIdentity mặc định dùng cookie).
+builder.Services.AddAuthentication(o =>
+{
+    o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(cfg =>
+{
+    cfg.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero,
+        ValidIssuer = configuration["JwtTokenSettings:Issuer"],
+        ValidAudience = configuration["JwtTokenSettings:Issuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
 });
 
 //Default config for ASP.NET Core
@@ -54,6 +92,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
