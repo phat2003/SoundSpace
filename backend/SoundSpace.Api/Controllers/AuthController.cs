@@ -2,13 +2,12 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using SoundSpace.Api.Extensions;
 using SoundSpace.Api.Services;
 using SoundSpace.Core.ConfigOptions;
 using SoundSpace.Core.Domain.Identity;
 using SoundSpace.Core.Models.Auth;
 using SoundSpace.Core.SeedWorks.Constants;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 
 namespace SoundSpace.Api.Controllers
 {
@@ -89,23 +88,7 @@ namespace SoundSpace.Api.Controllers
             }
 
             var roles = await _userManager.GetRolesAsync(user);
-            var claims = new List<Claim>
-            {
-                new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(UserClaims.Id, user.Id.ToString()),
-                new(ClaimTypes.Name, user.UserName!),
-                new(JwtRegisteredClaimNames.Email, user.Email!),
-                new(UserClaims.FullName, user.FullName),
-                new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-            };
-            if (user.AvatarUrl != null)
-            {
-                claims.Add(new(UserClaims.Avatar, user.AvatarUrl));
-            }
-            // Mỗi role một claim để dùng được [Authorize(Roles = Roles.Admin)].
-            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
-
-            var accessToken = _tokenService.GenerateAccessToken(claims);
+            var accessToken = _tokenService.GenerateAccessToken(user.GetClaims(roles));
             var refreshToken = _tokenService.GenerateRefreshToken();
 
             user.RefreshToken = refreshToken;
