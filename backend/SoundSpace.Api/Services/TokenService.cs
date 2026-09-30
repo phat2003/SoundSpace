@@ -38,5 +38,28 @@ namespace SoundSpace.Api.Services
         {
             return Convert.ToBase64String(RandomNumberGenerator.GetBytes(32));
         }
+
+        // Đọc claim từ access token đã hết hạn (vẫn kiểm tra chữ ký, issuer, audience; chỉ bỏ qua hạn dùng).
+        // Trả về null nếu token bị sửa, sai định dạng hoặc không phải do SoundSpace cấp.
+        public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidIssuer = _jwtTokenSettings.Issuer,
+                ValidAudience = _jwtTokenSettings.Issuer,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtTokenSettings.Key)),
+                ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
+                ValidateLifetime = false
+            };
+
+            try
+            {
+                return new JwtSecurityTokenHandler().ValidateToken(token, tokenValidationParameters, out _);
+            }
+            catch (Exception ex) when (ex is SecurityTokenException or ArgumentException)
+            {
+                return null;
+            }
+        }
     }
 }
