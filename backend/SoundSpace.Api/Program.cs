@@ -9,6 +9,8 @@ using SoundSpace.Core.ConfigOptions;
 using SoundSpace.Core.Domain.Identity;
 using SoundSpace.Core.Models.Auth;
 using SoundSpace.Data;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -74,6 +76,25 @@ builder.Services.AddAuthentication(o =>
         ValidAudience = configuration["JwtTokenSettings:Issuer"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
     };
+    // Trả lời 401 / 403 kèm thông báo tiếng Việt thay vì body rỗng.
+    cfg.Events = new JwtBearerEvents
+    {
+        OnChallenge = async context =>
+        {
+            context.HandleResponse();
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "text/plain; charset=utf-8";
+            await context.Response.WriteAsync(context.AuthenticateFailure is SecurityTokenExpiredException
+                ? "Phiên đăng nhập đã hết hạn."
+                : "Bạn cần đăng nhập để sử dụng chức năng này.");
+        },
+        OnForbidden = async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            context.Response.ContentType = "text/plain; charset=utf-8";
+            await context.Response.WriteAsync("Bạn không có quyền sử dụng chức năng này.");
+        }
+    };
 });
 
 //Default config for ASP.NET Core
@@ -82,6 +103,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
+    c.CustomOperationIds(apiDesc =>
+    {
+        return apiDesc.TryGetMethodInfo(out MethodInfo methodInfo) ? methodInfo.Name : null;
+    });
     // Nút "Authorize" trên Swagger: dán access token (không cần gõ "Bearer "), Swagger tự gắn header Authorization.
     var bearerScheme = new OpenApiSecurityScheme
     {
@@ -103,7 +128,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        //c.SwaggerEndpoint("AdminAPI/swagger.json", "Admin API");
+        c.DisplayOperationId();
+        c.DisplayRequestDuration();
+    });
 }
 
 app.UseHttpsRedirection();
