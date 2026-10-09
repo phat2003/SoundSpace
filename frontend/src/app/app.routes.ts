@@ -57,6 +57,11 @@ export const routes: Routes = [
         title: 'Đăng nhập · SoundSpace',
         loadComponent: () => import('./features/auth/login').then((m) => m.Login),
       },
+      {
+        path: 'register',
+        title: 'Đăng ký · SoundSpace',
+        loadComponent: () => import('./features/auth/register').then((m) => m.Register),
+      },
     ],
   },
   { path: '**', redirectTo: '' },
