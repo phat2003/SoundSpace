@@ -16,7 +16,16 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var connectionString = configuration.GetConnectionString("DefaultConnection");
+var SoundSpaceCorsPolicy = "SoundSpaceCorsPolicy";
 // Add services to the container.
+
+// CORS: cho phép frontend (khác origin) gọi API. Danh sách origin lấy từ "AllowedOrigins", cách nhau bằng dấu ";".
+builder.Services.AddCors(o => o.AddPolicy(SoundSpaceCorsPolicy, policy =>
+{
+    policy.AllowAnyMethod()
+        .AllowAnyHeader()
+        .WithOrigins(configuration["AllowedOrigins"]?.Split(";", StringSplitOptions.RemoveEmptyEntries) ?? []);
+}));
 
 //Config DB Context and ASP.NET Core Identity
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -136,6 +145,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseCors(SoundSpaceCorsPolicy);
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

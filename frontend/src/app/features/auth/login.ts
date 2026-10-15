@@ -1,11 +1,16 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { email, form, FormField, FormRoot, required } from '@angular/forms/signals';
+import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
+import { getApiErrors } from '../../core/http/api-error';
 import { AuthCard } from './auth-card';
 import { FieldError } from './field-error';
+import { FormAlert } from './form-alert';
 
 @Component({
   selector: 'app-login',
-  imports: [AuthCard, FieldError, FormField, FormRoot],
+  imports: [AuthCard, FieldError, FormAlert, FormField, FormRoot],
   template: `
     <app-auth-card>
       <div>
@@ -60,6 +65,8 @@ import { FieldError } from './field-error';
           <app-field-error [field]="loginForm.password" id="login-password-error" />
         </div>
 
+        <app-form-alert [messages]="serverErrors()" />
+
         <button
           type="submit"
           [disabled]="loginForm().submitting()"
@@ -73,7 +80,12 @@ import { FieldError } from './field-error';
   `,
 })
 export class Login {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+
   private readonly model = signal({ email: '', password: '' });
+  protected readonly serverErrors = signal<string[]>([]);
 
   protected readonly loginForm = form(
     this.model,
@@ -84,9 +96,24 @@ export class Login {
     },
     {
       submission: {
-        // Chỉ chạy khi form hợp lệ. Gọi API POST /api/auth/login sẽ làm ở task SS-57 (nối FE với API).
-        action: async () => undefined,
+        // Chỉ chạy khi form hợp lệ.
+        action: async () => {
+          this.serverErrors.set([]);
+          try {
+            await firstValueFrom(this.auth.login(this.model()));
+            await this.router.navigateByUrl(this.returnUrl());
+          } catch (error) {
+            this.serverErrors.set(getApiErrors(error));
+          }
+          return undefined;
+        },
       },
     },
   );
+
+  /** Trang cần quay lại sau khi đăng nhập (do guard gắn vào ?returnUrl=). Chỉ nhận đường dẫn nội bộ. */
+  private readonly returnUrl = () => {
+    const url = this.route.snapshot.queryParamMap.get('returnUrl');
+    return url?.startsWith('/') && !url.startsWith('//') ? url : '/';
+  };
 }

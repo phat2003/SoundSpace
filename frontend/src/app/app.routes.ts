@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { adminGuard, authGuard, guestGuard } from './core/auth/auth.guards';
 import { Shell } from './layout/shell/shell';
 
 export const routes: Routes = [
@@ -33,32 +34,37 @@ export const routes: Routes = [
       },
       {
         path: 'library',
+        canActivate: [authGuard],
         title: 'Thư viện · SoundSpace',
         loadComponent: () => import('./features/library/library').then((m) => m.Library),
       },
       {
         path: 'favorites',
+        canActivate: [authGuard],
         title: 'Yêu thích · SoundSpace',
         loadComponent: () => import('./features/favorites/favorites').then((m) => m.Favorites),
       },
       {
         path: 'settings',
+        canActivate: [authGuard],
         title: 'Cài đặt · SoundSpace',
         loadComponent: () => import('./features/settings/settings').then((m) => m.Settings),
       },
       {
-        // TODO: add an admin guard once login + roles exist.
         path: 'admin',
+        canActivate: [adminGuard],
         title: 'Quản trị · SoundSpace',
         loadComponent: () => import('./features/admin/admin').then((m) => m.Admin),
       },
       {
         path: 'login',
+        canActivate: [guestGuard],
         title: 'Đăng nhập · SoundSpace',
         loadComponent: () => import('./features/auth/login').then((m) => m.Login),
       },
       {
         path: 'register',
+        canActivate: [guestGuard],
         title: 'Đăng ký · SoundSpace',
         loadComponent: () => import('./features/auth/register').then((m) => m.Register),
       },

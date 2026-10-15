@@ -87,7 +87,6 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 - Khi một trang/tính năng nào đó chỉ cần hiển thị một vài data của một bảng nào đó mà không phải hiển thị đầy đủ data trong bảng thì hãy tạo các DTO trong thư mục Models và dùng AutoMapper. Nhớ tạo thư mục và đặt tên tương ứng với chức năng mà cần tới DTO đó của bảng.
 - Mỗi lần test API, hãy thêm Cách test thủ công (trên swagger) vào giữa cột Trường hợp và Kết quả test để tôi có thể biết cách test và tự mình test thủ công khi cần thiết.
 
-
 ## Quy tắc bắt buộc (KHÔNG được vi phạm)
 - ❌ KHÔNG xóa mock data khi chưa có API thật
 - ❌ KHÔNG thay đổi cấu trúc thư mục features/
