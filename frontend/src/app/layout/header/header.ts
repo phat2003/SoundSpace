@@ -1,5 +1,6 @@
 import { Component, inject, output } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -34,19 +35,50 @@ import { Router, RouterLink } from '@angular/router';
       />
     </form>
 
-    <a
-      routerLink="/login"
-      class="ml-auto flex shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 font-label-md text-on-primary transition-transform hover:scale-105"
-    >
-      <span class="material-symbols-outlined text-[20px]" aria-hidden="true">login</span>
-      <span class="hidden sm:inline">Đăng nhập</span>
-    </a>
+    @if (auth.currentUser(); as user) {
+      <div class="ml-auto flex shrink-0 items-center gap-1">
+        <a
+          routerLink="/settings"
+          class="flex items-center gap-2 rounded-full py-1 pr-3 pl-1 text-on-surface hover:bg-surface-container-high"
+          [attr.aria-label]="'Tài khoản: ' + user.fullName"
+        >
+          @if (user.avatarUrl) {
+            <img [src]="user.avatarUrl" alt="" class="h-8 w-8 rounded-full object-cover" />
+          } @else {
+            <span
+              class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-container font-label-md text-on-primary-container"
+              aria-hidden="true"
+              >{{ user.fullName.charAt(0).toUpperCase() }}</span
+            >
+          }
+          <span class="hidden max-w-40 truncate font-label-md sm:inline">{{ user.fullName }}</span>
+        </a>
+        <button
+          type="button"
+          class="rounded-full p-2 text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface"
+          aria-label="Đăng xuất"
+          title="Đăng xuất"
+          (click)="auth.logout()"
+        >
+          <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+        </button>
+      </div>
+    } @else {
+      <a
+        routerLink="/login"
+        class="ml-auto flex shrink-0 items-center gap-2 rounded-full bg-primary px-4 py-2 font-label-md text-on-primary transition-transform hover:scale-105"
+      >
+        <span class="material-symbols-outlined text-[20px]" aria-hidden="true">login</span>
+        <span class="hidden sm:inline">Đăng nhập</span>
+      </a>
+    }
   `,
 })
 export class Header {
   readonly menuToggle = output<void>();
 
   private readonly router = inject(Router);
+  protected readonly auth = inject(AuthService);
 
   protected search(event: Event, query: string): void {
     event.preventDefault();

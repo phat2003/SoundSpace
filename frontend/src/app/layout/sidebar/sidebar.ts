@@ -1,12 +1,14 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { NgOptimizedImage } from '@angular/common';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 
 interface NavItem {
   path: string;
   label: string;
   icon: string;
   exact?: boolean;
+  adminOnly?: boolean;
 }
 
 @Component({
@@ -25,7 +27,7 @@ interface NavItem {
     </a>
 
     <nav aria-label="Điều hướng chính" class="flex-1 space-y-1 overflow-y-auto px-4">
-      @for (item of navItems; track item.path) {
+      @for (item of visibleNavItems(); track item.path) {
         <a
           [routerLink]="item.path"
           routerLinkActive="bg-primary-container font-semibold text-on-primary-container hover:bg-primary-container hover:text-on-primary-container"
@@ -45,14 +47,20 @@ export class Sidebar {
   readonly open = input(false);
   readonly navigate = output<void>();
 
-  protected readonly navItems: NavItem[] = [
+  private readonly auth = inject(AuthService);
+
+  private readonly navItems: NavItem[] = [
     { path: '/', label: 'Khám phá', icon: 'explore', exact: true },
     { path: '/genres', label: 'Khám phá thể loại', icon: 'category' },
     { path: '/now-playing', label: 'Trình phát nhạc', icon: 'play_circle' },
     { path: '/library', label: 'Thư viện', icon: 'library_music' },
     { path: '/favorites', label: 'Yêu thích', icon: 'favorite' },
-    // Will be shown only to admins once login + roles exist.
-    { path: '/admin', label: 'Quản trị', icon: 'admin_panel_settings' },
+    { path: '/admin', label: 'Quản trị', icon: 'admin_panel_settings', adminOnly: true },
     { path: '/settings', label: 'Cài đặt', icon: 'settings' },
   ];
+
+  // Mục Quản trị chỉ hiện với Admin.
+  protected readonly visibleNavItems = computed(() =>
+    this.navItems.filter((item) => !item.adminOnly || this.auth.isAdmin()),
+  );
 }

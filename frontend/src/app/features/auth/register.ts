@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import {
   email,
   form,
@@ -10,12 +10,17 @@ import {
   required,
   validate,
 } from '@angular/forms/signals';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { AuthService } from '../../core/auth/auth.service';
+import { getApiErrors } from '../../core/http/api-error';
 import { AuthCard } from './auth-card';
 import { FieldError } from './field-error';
+import { FormAlert } from './form-alert';
 
 @Component({
   selector: 'app-register',
-  imports: [AuthCard, FieldError, FormField, FormRoot],
+  imports: [AuthCard, FieldError, FormAlert, FormField, FormRoot],
   template: `
     <app-auth-card>
       <div>
@@ -131,6 +136,8 @@ import { FieldError } from './field-error';
           Mật khẩu ít nhất 8 ký tự, gồm chữ hoa, chữ thường, chữ số và ký tự đặc biệt.
         </p>
 
+        <app-form-alert [messages]="serverErrors()" />
+
         <button
           type="submit"
           [disabled]="registerForm().submitting()"
@@ -144,7 +151,11 @@ import { FieldError } from './field-error';
   `,
 })
 export class Register {
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
+
   private readonly model = signal({ fullName: '', email: '', password: '', confirmPassword: '' });
+  protected readonly serverErrors = signal<string[]>([]);
 
   // Quy tắc giống backend (RegisterRequest + cấu hình Identity trong Program.cs) để báo lỗi ngay, đỡ gọi API thừa.
   protected readonly registerForm = form(
@@ -177,8 +188,21 @@ export class Register {
     },
     {
       submission: {
-        // Chỉ chạy khi form hợp lệ. Gọi API POST /api/auth/register sẽ làm ở task SS-57 (nối FE với API).
-        action: async () => undefined,
+        // Chỉ chạy khi form hợp lệ. API đăng ký không trả token nên đăng nhập luôn bằng thông tin vừa nhập.
+        action: async () => {
+          this.serverErrors.set([]);
+          const request = this.model();
+          try {
+            await firstValueFrom(this.auth.register(request));
+            await firstValueFrom(
+              this.auth.login({ email: request.email, password: request.password }),
+            );
+            await this.router.navigateByUrl('/');
+          } catch (error) {
+            this.serverErrors.set(getApiErrors(error));
+          }
+          return undefined;
+        },
       },
     },
   );
