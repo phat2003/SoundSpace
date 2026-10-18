@@ -38,7 +38,7 @@ import { AuthService } from '../../core/auth/auth.service';
     @if (auth.currentUser(); as user) {
       <div class="ml-auto flex shrink-0 items-center gap-1">
         <a
-          routerLink="/settings"
+          routerLink="/profile"
           class="flex items-center gap-2 rounded-full py-1 pr-3 pl-1 text-on-surface hover:bg-surface-container-high"
           [attr.aria-label]="'Tài khoản: ' + user.fullName"
         >
