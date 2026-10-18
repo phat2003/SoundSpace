@@ -45,6 +45,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/favorites/favorites').then((m) => m.Favorites),
       },
       {
+        path: 'profile',
+        canActivate: [authGuard],
+        title: 'Hồ sơ · SoundSpace',
+        loadComponent: () => import('./features/profile/profile').then((m) => m.Profile),
+      },
+      {
         path: 'settings',
         canActivate: [authGuard],
         title: 'Cài đặt · SoundSpace',

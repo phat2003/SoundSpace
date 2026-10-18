@@ -56,6 +56,7 @@ export class Sidebar {
     { path: '/library', label: 'Thư viện', icon: 'library_music' },
     { path: '/favorites', label: 'Yêu thích', icon: 'favorite' },
     { path: '/admin', label: 'Quản trị', icon: 'admin_panel_settings', adminOnly: true },
+    { path: '/profile', label: 'Hồ sơ', icon: 'account_circle' },
     { path: '/settings', label: 'Cài đặt', icon: 'settings' },
   ];
 
