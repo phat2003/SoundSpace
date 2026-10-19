@@ -5,8 +5,6 @@ import {
   FormField,
   FormRoot,
   maxLength,
-  minLength,
-  pattern,
   required,
   validate,
 } from '@angular/forms/signals';
@@ -17,6 +15,7 @@ import { getApiErrors } from '../../core/http/api-error';
 import { AuthCard } from './auth-card';
 import { FieldError } from './field-error';
 import { FormAlert } from './form-alert';
+import { passwordRules } from './password-rules';
 
 @Component({
   selector: 'app-register',
@@ -168,16 +167,7 @@ export class Register {
       email(path.email, { message: 'Email không hợp lệ.' });
       maxLength(path.email, 256, { message: 'Email tối đa 256 ký tự.' });
 
-      required(path.password, { message: 'Vui lòng nhập mật khẩu.' });
-      minLength(path.password, 8, { message: 'Mật khẩu phải có ít nhất 8 ký tự.' });
-      pattern(path.password, /[A-Z]/, { message: 'Mật khẩu phải có ít nhất một chữ hoa (A-Z).' });
-      pattern(path.password, /[a-z]/, {
-        message: 'Mật khẩu phải có ít nhất một chữ thường (a-z).',
-      });
-      pattern(path.password, /[0-9]/, { message: 'Mật khẩu phải có ít nhất một chữ số (0-9).' });
-      pattern(path.password, /[^a-zA-Z0-9]/, {
-        message: 'Mật khẩu phải có ít nhất một ký tự đặc biệt (ví dụ @, #, $).',
-      });
+      passwordRules(path.password);
 
       required(path.confirmPassword, { message: 'Vui lòng xác nhận mật khẩu.' });
       validate(path.confirmPassword, ({ value, valueOf }) =>

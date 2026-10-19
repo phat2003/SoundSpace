@@ -85,7 +85,6 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 - Component dùng arrow function
 - Các code nào đã được viết sẵn trong dự án(có thể là code tham khảo từ project khác hoặc đại loại vậy,...) nhưng chưa phù hợp với dự án thì hãy refactoring lại cho phù hợp. Còn code nào đã có sẵn trong dự án và hoạt động ổn định rồi thì đừng thay đổi nó nếu không cần thiết
 - Khi một trang/tính năng nào đó chỉ cần hiển thị một vài data của một bảng nào đó mà không phải hiển thị đầy đủ data trong bảng thì hãy tạo các DTO trong thư mục Models và dùng AutoMapper. Nhớ tạo thư mục và đặt tên tương ứng với chức năng mà cần tới DTO đó của bảng.
-- Phần test (như là test API, chức năng,... không được tự ý test): hãy thêm Cách test thủ công (nếu là API thì test trên swagger) vào giữa cột Trường hợp và Kết quả test để tôi có thể biết cách test và tự mình test thủ công.
 
 ## Quy tắc bắt buộc (KHÔNG được vi phạm)
 - ❌ KHÔNG xóa mock data khi chưa có API thật
@@ -98,3 +97,5 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 - Luôn đọc CLAUDE.md trước khi bắt đầu bất kỳ task nào
 - Khi không chắc → hỏi trước, không tự ý sửa
 - Ưu tiên sửa từng page một, không sửa nhiều file cùng lúc
+- Phần test (như là test API, chức năng,... không được tự ý test): hãy thêm Cách test thủ công (nếu là API thì test trên swagger) vào giữa cột Trường hợp và Kết quả test để tôi có thể biết cách test và tự mình test thủ công.
+- Thông thường khi làm một task mới/phát triển tính năng mới thì sẽ tạo một nhánh mới. Trường hợp nếu nhánh mới chưa được tạo và vẫn đang ở trên nhánh cũ thì bạn hãy hỏi trước khi làm bằng câu hỏi có tạo nhánh mới hay không, nếu nhánh mới đã được tạo và đang ở trên nhánh mới rồi thì hãy thực hiện mệnh lệnh được yêu cầu.
