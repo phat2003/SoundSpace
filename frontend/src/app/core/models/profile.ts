@@ -7,3 +7,14 @@ export interface Profile {
   roles: string[];
   dateCreated: string;
 }
+
+// Khớp với UpdateProfileRequest / ChangePasswordRequest trong backend/SoundSpace.Core/Models/UserProfile.
+export interface UpdateProfileRequest {
+  fullName: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}

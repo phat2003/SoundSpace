@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { finalize, firstValueFrom, Observable, shareReplay, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthenticatedResult, CurrentUser, LoginRequest, RegisterRequest } from '../models/auth';
+import { ChangePasswordRequest } from '../models/profile';
 
 export const ADMIN_ROLE = 'Admin';
 
@@ -67,6 +68,15 @@ export class AuthService {
       );
     return this.refreshInFlight;
   };
+
+  /**
+   * Đổi mật khẩu. API trả về cặp token mới (refresh token cũ bị huỷ) nên lưu lại luôn ở đây
+   * để phiên hiện tại không bị đăng xuất.
+   */
+  readonly changePassword = (request: ChangePasswordRequest) =>
+    this.http
+      .put<AuthenticatedResult>(`${this.apiUrl}/profile/change-password`, request)
+      .pipe(tap(this.saveTokens));
 
   /** Huỷ refresh token trên server (bỏ qua lỗi), xoá token ở trình duyệt rồi về trang đăng nhập. */
   readonly logout = async () => {
