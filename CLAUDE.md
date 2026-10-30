@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Tổng quan
 
-SoundSpace là website nghe nhạc (lấy ý tưởng từ SoundCloud, dùng nội bộ): Angular ở `frontend/`, ASP.NET Core 8 Web API ở `backend/`, PostgreSQL, file nhạc/ảnh trên Firebase Storage. Chủ dự án là người mới học Clean Architecture qua khoá học TeduBlog (https://github.com/phat2003/tedu-blog) — backend cố ý đi theo cấu trúc và cách viết của khoá học đó; khi thêm code backend, đối chiếu với TeduBlog trước khi tự nghĩ ra cấu trúc mới. Trao đổi với người dùng bằng tiếng Việt.
+SoundSpace là website nghe nhạc (lấy ý tưởng từ SoundCloud, dùng nội bộ): Angular ở `frontend/`, ASP.NET Core 8 Web API ở `backend/`, PostgreSQL, file nhạc/ảnh trên Cloudflare R2 (tương thích S3). Chủ dự án là người mới học Clean Architecture qua khoá học TeduBlog (https://github.com/phat2003/tedu-blog) — backend cố ý đi theo cấu trúc và cách viết của khoá học đó; khi thêm code backend, đối chiếu với TeduBlog trước khi tự nghĩ ra cấu trúc mới. Trao đổi với người dùng bằng tiếng Việt.
 
 Triển khai dự kiến: Vercel (frontend), Render qua Docker (API), Neon (PostgreSQL). Hiện đang chạy PostgreSQL trên máy (local), chưa kết nối Neon.
 
@@ -46,7 +46,7 @@ Ba project, phụ thuộc một chiều: `Api → Data → Core`, `Api → Core`
 
 - **`SoundSpace.Core`** — entity trong `Domain/<nhóm nghiệp vụ>/` (`Identity`, `Catalog`, `Library`, `Activity`, `Discovery`), hằng số trong `SeedWorks/Constants` (`Roles.Admin`, `Roles.User`). Thư mục `IRepositories`, `Models`, `SeedWorks` dành cho interface repository/UnitOfWork và DTO theo kiểu TeduBlog.
 - **`SoundSpace.Data`** — `ApplicationDbContext` (kế thừa `IdentityDbContext<AppUser, AppRole, Guid>`), migrations, `DataSeeder`, sau này là repository.
-- **`SoundSpace.Api`** — `Program.cs` (DbContext + Identity), controller, và các service gọi dịch vụ ngoài (JWT, Firebase) đặt ở `Api/Services` như TeduBlog.
+- **`SoundSpace.Api`** — `Program.cs` (DbContext + Identity), controller, và các service gọi dịch vụ ngoài (JWT, Cloudflare R2 qua thư viện AWSSDK.S3) đặt ở `Api/Services` như TeduBlog.
 
 Quy ước entity (theo TeduBlog):
 - Cấu hình bằng data annotation trên entity (`[Table]`, `[Index]`, `[PrimaryKey]` cho bảng nối, `[MaxLength]`, `required`), khoá chính `Guid`, có `DateCreated` / `DateModified`.
@@ -60,7 +60,7 @@ Những hành vi dễ bỏ sót trong `ApplicationDbContext`:
 Khởi động và seed: `Program.cs` gọi `await app.MigrateDatabaseAsync()` (`Api/MigrationManager.cs`) → áp migration → `DataSeeder.SeedAsync` tạo role `Admin`, `User` và hai tài khoản test `admin` (role Admin) và `user` (role User) qua `UserManager`/`RoleManager` (idempotent, kiểm tra theo tên).
 
 Một số quyết định nghiệp vụ phản ánh trong model:
-- `Song.AudioFilePath` là đường dẫn trong Firebase Storage (không phải URL công khai); API sẽ cấp signed URL khi phát. Ảnh lưu URL trực tiếp (`CoverImageUrl`, `AvatarUrl`).
+- Hai bucket R2 (cấu hình `R2StorageSettings`): `soundspace` (private) chứa nhạc — `Song.AudioFilePath` là key của file, API sẽ cấp presigned URL có hạn khi phát; `soundspace-images` (bật Public access) chứa ảnh — các cột `CoverImageUrl`, `AvatarUrl`… lưu URL công khai. Upload/xoá file qua `IFileStorageService` (`Api/Services/R2FileStorageService.cs`); admin upload trước qua `api/admin/media` rồi gửi key/URL khi lưu bản ghi.
 - Một bài hát có nhiều nghệ sĩ qua `SongArtist` (`SortOrder = 0` là nghệ sĩ chính), đúng một thể loại (`GenreId`); `AlbumId` null = single.
 - `ListenHistory.UserId` nullable: khách chưa đăng nhập vẫn nghe trọn bài và được tính lượt phát; `Song.PlayCount` là bộ đếm phi chuẩn hoá để xếp hạng.
 - Ẩn/khoá bằng cờ (`IsVisible`, `IsActive`) thay vì xoá.
@@ -77,7 +77,7 @@ Angular 22 (standalone, signals, zoneless, `OnPush` mặc định) + Tailwind CS
 
 ## Phạm vi MVP
 
-Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố định, hàng chờ, shuffle/repeat, khám phá, tìm kiếm, yêu thích, playlist, lưu album, theo dõi nghệ sĩ. Admin: CRUD thể loại/nghệ sĩ/album/bài hát (upload MP3 lên Firebase), quản lý người dùng, dashboard. **Ngoài phạm vi MVP**: Premium, người dùng tự đăng nhạc, bình luận, repost, gợi ý cá nhân hoá, lời bài hát chạy theo thời gian, thẻ xem trước Open Graph. Không thêm các tính năng này trừ khi được yêu cầu.
+Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố định, hàng chờ, shuffle/repeat, khám phá, tìm kiếm, yêu thích, playlist, lưu album, theo dõi nghệ sĩ. Admin: CRUD thể loại/nghệ sĩ/album/bài hát (upload MP3 lên Cloudflare R2), quản lý người dùng, dashboard. **Ngoài phạm vi MVP**: Premium, người dùng tự đăng nhạc, bình luận, repost, gợi ý cá nhân hoá, lời bài hát chạy theo thời gian, thẻ xem trước Open Graph. Không thêm các tính năng này trừ khi được yêu cầu.
 
 ## Quy tắc code
 - Viết comment bằng tiếng Việt

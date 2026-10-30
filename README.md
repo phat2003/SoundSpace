@@ -48,7 +48,7 @@ Dự án chỉ tham khảo ý tưởng từ SoundCloud. Đây là website kín, 
 | Frontend | Angular 22 (standalone components, signals), Tailwind CSS 4, Material Symbols |
 | Backend | ASP.NET Core 8 Web API, Entity Framework Core |
 | Cơ sở dữ liệu | PostgreSQL (Neon) |
-| Lưu file nhạc, ảnh | Firebase Storage |
+| Lưu file nhạc, ảnh | Cloudflare R2 (tương thích S3) |
 | Triển khai | Vercel (frontend), Render qua Docker (backend), Neon (database) |
 
 ## Kiến trúc
@@ -65,12 +65,12 @@ SoundSpace.Api   ──►  SoundSpace.Data  ──►  SoundSpace.Core
 | --- | --- |
 | `SoundSpace.Core` | Entity (Song, Artist, Album, Genre, Playlist…), model/DTO, interface repository và service. Không phụ thuộc project nào khác. |
 | `SoundSpace.Data` | `DbContext`, cấu hình EF Core, migration, cài đặt repository và UnitOfWork. |
-| `SoundSpace.Api` | Controller, xác thực JWT, cấu hình DI, Swagger, các service gọi dịch vụ ngoài (Firebase). |
+| `SoundSpace.Api` | Controller, xác thực JWT, cấu hình DI, Swagger, các service gọi dịch vụ ngoài (Cloudflare R2). |
 
 ```text
 Trình duyệt (Angular, Vercel) ──REST + JWT──► ASP.NET Core API (Render) ──► PostgreSQL (Neon)
           │                                            │
-          └────────── phát MP3, tải ảnh ──────► Firebase Storage ◄── upload / xoá
+          └────────── phát MP3, tải ảnh ──────► Cloudflare R2 ◄── upload / xoá
 ```
 
 ## Cấu trúc thư mục
@@ -117,7 +117,7 @@ dotnet run --launch-profile https
 
 Swagger mở tại <https://localhost:7270/swagger>.
 
-Chuỗi kết nối PostgreSQL và cấu hình Firebase, JWT sẽ nằm trong `appsettings.Development.json` hoặc [User Secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets). **Không commit mật khẩu hay khoá bí mật lên GitHub.**
+Chuỗi kết nối PostgreSQL và cấu hình Cloudflare R2, JWT sẽ nằm trong `appsettings.Development.json` hoặc [User Secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets). **Không commit mật khẩu hay khoá bí mật lên GitHub.**
 
 ### Frontend
 
@@ -147,7 +147,7 @@ Giao diện được thiết kế bằng Google Stitch: tông tối, điểm nh�
 - [x] Layout chung: sidebar, header, khung thanh player, routing
 - [x] Kết nối PostgreSQL (Neon), EF Core, migration đầu tiên
 - [ ] Đăng ký, đăng nhập, JWT, phân quyền
-- [ ] Trang quản trị: thể loại, nghệ sĩ, album, bài hát (upload lên Firebase)
+- [ ] Trang quản trị: thể loại, nghệ sĩ, album, bài hát (upload lên Cloudflare R2)
 - [ ] Trình phát nhạc: phát thật, hàng chờ, trộn bài, lặp lại, đếm lượt nghe
 - [ ] Khám phá, tìm kiếm, trang bài hát chia sẻ được
 - [ ] Thư viện cá nhân: yêu thích, playlist, theo dõi nghệ sĩ
