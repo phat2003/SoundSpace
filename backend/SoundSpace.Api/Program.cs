@@ -1,6 +1,9 @@
+using Amazon.Runtime;
+using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SoundSpace.Api;
@@ -105,6 +108,27 @@ builder.Services.AddAuthentication(o =>
         }
     };
 });
+
+// Lưu file trên Cloudflare R2 (tương thích S3) qua thư viện AWSSDK.S3.
+builder.Services.Configure<R2StorageSettings>(configuration.GetSection("R2StorageSettings"));
+builder.Services.Configure<MediaSettings>(configuration.GetSection("MediaSettings"));
+builder.Services.AddSingleton<IAmazonS3>(sp =>
+{
+    var r2 = sp.GetRequiredService<IOptions<R2StorageSettings>>().Value;
+    if (string.IsNullOrEmpty(r2.AccountId) || string.IsNullOrEmpty(r2.AccessKeyId) || string.IsNullOrEmpty(r2.SecretAccessKey))
+    {
+        throw new InvalidOperationException("Chưa cấu hình R2StorageSettings (AccountId, AccessKeyId, SecretAccessKey) trong appsettings hoặc biến môi trường.");
+    }
+
+    return new AmazonS3Client(r2.AccessKeyId, r2.SecretAccessKey, new AmazonS3Config
+    {
+        ServiceURL = $"https://{r2.AccountId}.r2.cloudflarestorage.com",
+        // Chỉ tính checksum khi bắt buộc, vì R2 không nhận checksum mặc định của AWSSDK v4.
+        RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
+        ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED
+    });
+});
+builder.Services.AddScoped<IFileStorageService, R2FileStorageService>();
 
 //Default config for ASP.NET Core
 builder.Services.AddControllers();
