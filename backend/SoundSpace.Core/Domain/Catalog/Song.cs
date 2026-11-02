@@ -35,8 +35,8 @@ namespace SoundSpace.Core.Domain.Catalog
         public Guid GenreId { get; set; }
 
         /// <summary>
-        /// Đường dẫn file MP3 trong Firebase Storage (không phải URL công khai).
-        /// API sẽ cấp signed URL có thời hạn mỗi lần phát.
+        /// Key của file MP3 trong bucket nhạc (private) trên Cloudflare R2, không phải URL công khai.
+        /// API cấp presigned URL có thời hạn mỗi lần phát (GET api/song/{id}/stream).
         /// </summary>
         [Required]
         [MaxLength(500)]

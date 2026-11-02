@@ -1,3 +1,5 @@
+using SoundSpace.Core.Models.Player;
+
 namespace SoundSpace.Api.Services
 {
     public interface IFileStorageService
@@ -7,6 +9,9 @@ namespace SoundSpace.Api.Services
 
         // Upload ảnh vào thư mục folder (xem ImageFolders) của bucket ảnh, trả về URL công khai để lưu vào các cột ...Url.
         Task<string> UploadImageAsync(Stream content, string fileName, string folder, CancellationToken cancellationToken = default);
+
+        // Cấp presigned URL (link tạm thời, hết hạn sau AudioUrlExpireInMinutes) để nghe file nhạc trong bucket private.
+        Task<AudioStreamDto> GetAudioUrlAsync(string key);
 
         Task DeleteAudioAsync(string key, CancellationToken cancellationToken = default);
 

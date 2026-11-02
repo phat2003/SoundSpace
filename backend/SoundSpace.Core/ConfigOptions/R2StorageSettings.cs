@@ -9,6 +9,8 @@ namespace SoundSpace.Core.ConfigOptions
         public required string SecretAccessKey { get; set; }
         // Bucket private chứa file nhạc, chỉ phát được qua presigned URL do API cấp.
         public required string AudioBucketName { get; set; }
+        // Thời hạn của link phát nhạc (presigned URL). Nên dài hơn một bài hát để tua không bị lỗi giữa chừng.
+        public int AudioUrlExpireInMinutes { get; set; }
         // Bucket bật Public access chứa ảnh (bìa, avatar, banner...).
         public required string ImageBucketName { get; set; }
         // URL công khai của bucket ảnh (r2.dev hoặc tên miền riêng), ví dụ https://pub-xxxx.r2.dev

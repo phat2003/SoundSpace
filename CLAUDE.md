@@ -45,7 +45,7 @@ Dùng `npm start` / `npx ng ...` (Angular CLI 22 cục bộ), không dùng `ng` 
 Ba project, phụ thuộc một chiều: `Api → Data → Core`, `Api → Core`.
 
 - **`SoundSpace.Core`** — entity trong `Domain/<nhóm nghiệp vụ>/` (`Identity`, `Catalog`, `Library`, `Activity`, `Discovery`), hằng số trong `SeedWorks/Constants` (`Roles.Admin`, `Roles.User`). Thư mục `IRepositories`, `Models`, `SeedWorks` dành cho interface repository/UnitOfWork và DTO theo kiểu TeduBlog.
-- **`SoundSpace.Data`** — `ApplicationDbContext` (kế thừa `IdentityDbContext<AppUser, AppRole, Guid>`), migrations, `DataSeeder`, sau này là repository.
+- **`SoundSpace.Data`** — `ApplicationDbContext` (kế thừa `IdentityDbContext<AppUser, AppRole, Guid>`), migrations, `DataSeeder`, repository (`Repositories/`, kế thừa `SeedWorks/RepositoryBase`) và `SeedWorks/UnitOfWork`. Controller đọc/ghi database qua `IUnitOfWork` (interface ở `Core/SeedWorks`, `Core/IRepositories`); thêm repository mới thì khai báo thêm property trong `IUnitOfWork`/`UnitOfWork`.
 - **`SoundSpace.Api`** — `Program.cs` (DbContext + Identity), controller, và các service gọi dịch vụ ngoài (JWT, Cloudflare R2 qua thư viện AWSSDK.S3) đặt ở `Api/Services` như TeduBlog.
 
 Quy ước entity (theo TeduBlog):
@@ -95,6 +95,7 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 - 🔄 Tất cả các page đều đang trong quá trình phát triển
 ## Lưu ý khi làm việc
 - Luôn đọc CLAUDE.md trước khi bắt đầu bất kỳ task nào
+- Khi báo cáo kết quả sau mỗi task, phần "Đã làm" trình bày bằng bảng 2 cột **File** | **Vai trò** (tên file là link bấm được, vai trò mô tả ngắn file đó làm gì), bên dưới bảng có phần **Giải thích ngắn** bằng lời dễ hiểu cho người mới: vì sao làm như vậy, điểm khác so với code tham khảo (nếu có), các con số/cấu hình được chọn và lý do.
 - Khi không chắc → hỏi trước, không tự ý sửa
 - Ưu tiên sửa từng page một, không sửa nhiều file cùng lúc
 - Phần test (như là test API, chức năng,... không được tự ý test): hãy thêm Cách test thủ công (nếu là API thì test trên swagger) vào giữa cột Trường hợp và Kết quả test để tôi có thể biết cách test và tự mình test thủ công.
