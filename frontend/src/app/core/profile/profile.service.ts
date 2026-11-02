@@ -14,4 +14,11 @@ export class ProfileService {
   /** Trả về hồ sơ sau khi sửa. */
   readonly updateProfile = (request: UpdateProfileRequest) =>
     this.http.put<Profile>(this.apiUrl, request);
+
+  /** Gửi ảnh dạng multipart (tên trường "file" khớp tham số IFormFile file), trả về hồ sơ có AvatarUrl mới. */
+  readonly uploadAvatar = (file: File) => {
+    const body = new FormData();
+    body.append('file', file);
+    return this.http.put<Profile>(`${this.apiUrl}/avatar`, body);
+  };
 }
