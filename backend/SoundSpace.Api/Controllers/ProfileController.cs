@@ -9,6 +9,7 @@ using SoundSpace.Core.ConfigOptions;
 using SoundSpace.Core.Domain.Identity;
 using SoundSpace.Core.Models.Auth;
 using SoundSpace.Core.Models.UserProfile;
+using SoundSpace.Core.SeedWorks.Constants;
 
 namespace SoundSpace.Api.Controllers
 {
@@ -22,16 +23,25 @@ namespace SoundSpace.Api.Controllers
         private readonly ITokenService _tokenService;
         private readonly JwtTokenSettings _jwtTokenSettings;
         private readonly IMapper _mapper;
+        private readonly IFileStorageService _fileStorageService;
+        private readonly MediaSettings _mediaSettings;
+        private readonly ILogger<ProfileController> _logger;
 
         public ProfileController(UserManager<AppUser> userManager,
             ITokenService tokenService,
             IOptions<JwtTokenSettings> jwtTokenSettings,
-            IMapper mapper)
+            IMapper mapper,
+            IFileStorageService fileStorageService,
+            IOptions<MediaSettings> mediaSettings,
+            ILogger<ProfileController> logger)
         {
             _userManager = userManager;
             _tokenService = tokenService;
             _jwtTokenSettings = jwtTokenSettings.Value;
             _mapper = mapper;
+            _fileStorageService = fileStorageService;
+            _mediaSettings = mediaSettings.Value;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -60,6 +70,52 @@ namespace SoundSpace.Api.Controllers
             if (!result.Succeeded)
             {
                 return BadRequest(result.Errors.Select(e => e.Description));
+            }
+
+            return Ok(await ToProfileDtoAsync(user));
+        }
+
+        // Đổi ảnh đại diện: upload ảnh mới vào thư mục avatars của bucket ảnh, lưu URL vào AppUser.AvatarUrl rồi xoá ảnh cũ.
+        [HttpPut("avatar")]
+        public async Task<ActionResult<ProfileDto>> UpdateAvatar(IFormFile file, CancellationToken cancellationToken)
+        {
+            var user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return Unauthorized();
+            }
+
+            var error = file.Validate(_mediaSettings.AllowImageFileTypes, _mediaSettings.MaxImageSizeInMB);
+            if (error != null)
+            {
+                return BadRequest(new[] { error });
+            }
+
+            await using var stream = file.OpenReadStream();
+            var avatarUrl = await _fileStorageService.UploadImageAsync(stream, file.FileName, ImageFolders.Avatars, cancellationToken);
+
+            var oldAvatarUrl = user.AvatarUrl;
+            user.AvatarUrl = avatarUrl;
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                // Lưu thất bại thì xoá ảnh vừa upload để không để lại file rác trên R2.
+                await _fileStorageService.DeleteImageAsync(avatarUrl, CancellationToken.None);
+                return BadRequest(result.Errors.Select(e => e.Description));
+            }
+
+            // Ảnh mới đã lưu xong nên xoá ảnh cũ lỗi cũng không báo lỗi cho người dùng, chỉ ghi log
+            // (ảnh không thuộc bucket của SoundSpace thì DeleteImageAsync tự bỏ qua).
+            if (oldAvatarUrl != null)
+            {
+                try
+                {
+                    await _fileStorageService.DeleteImageAsync(oldAvatarUrl, CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Không xoá được ảnh đại diện cũ {AvatarUrl}", oldAvatarUrl);
+                }
             }
 
             return Ok(await ToProfileDtoAsync(user));

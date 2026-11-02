@@ -4,15 +4,16 @@ import { AuthService } from '../../core/auth/auth.service';
 import { getApiErrors } from '../../core/http/api-error';
 import { ProfileService } from '../../core/profile/profile.service';
 import { AccountInfoForm } from './account-info-form';
+import { AvatarForm } from './avatar-form';
 import { ChangePasswordForm } from './change-password-form';
 
 /**
- * Trang Cài đặt theo mẫu Stitch "Cài đặt". MVP chỉ có mục Tài khoản (sửa tên, đổi mật khẩu, đăng xuất);
+ * Trang Cài đặt theo mẫu Stitch "Cài đặt". MVP chỉ có mục Tài khoản (ảnh đại diện, sửa tên, đổi mật khẩu, đăng xuất);
  * các mục Âm thanh, Giao diện, Thông báo, Quyền riêng tư, Bộ nhớ và thẻ Premium nằm ngoài MVP nên không hiện.
  */
 @Component({
   selector: 'app-settings',
-  imports: [AccountInfoForm, ChangePasswordForm],
+  imports: [AccountInfoForm, AvatarForm, ChangePasswordForm],
   host: {
     class: 'flex flex-col gap-8 px-space-md py-space-xl sm:px-space-lg lg:flex-row',
   },
@@ -49,7 +50,9 @@ import { ChangePasswordForm } from './change-password-form';
     <div class="flex min-w-0 flex-1 flex-col gap-8">
       <div>
         <h1 class="font-headline-lg text-on-surface">Tài khoản</h1>
-        <p class="mt-1 text-body-md text-outline">Quản lý thông tin cá nhân và mật khẩu của bạn.</p>
+        <p class="mt-1 text-body-md text-outline">
+          Quản lý ảnh đại diện, thông tin cá nhân và mật khẩu của bạn.
+        </p>
       </div>
 
       @if (profile.error()) {
@@ -70,6 +73,7 @@ import { ChangePasswordForm } from './change-password-form';
           </button>
         </div>
       } @else if (profile.hasValue()) {
+        <app-avatar-form [profile]="profile.value()" (profileChange)="profile.set($event)" />
         <app-account-info-form [profile]="profile.value()" (profileChange)="profile.set($event)" />
         <app-change-password-form />
       } @else {

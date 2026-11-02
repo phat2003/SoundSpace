@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using SoundSpace.Api.Extensions;
 using SoundSpace.Api.Services;
 using SoundSpace.Core.ConfigOptions;
 using SoundSpace.Core.SeedWorks.Constants;
@@ -27,7 +28,7 @@ namespace SoundSpace.Api.Controllers.AdminApi
         [HttpPost("audio")]
         public async Task<IActionResult> UploadAudio(IFormFile file, CancellationToken cancellationToken)
         {
-            var error = ValidateFile(file, _settings.AllowAudioFileTypes, _settings.MaxAudioSizeInMB);
+            var error = file.Validate(_settings.AllowAudioFileTypes, _settings.MaxAudioSizeInMB);
             if (error != null)
             {
                 return BadRequest(new[] { error });
@@ -47,7 +48,7 @@ namespace SoundSpace.Api.Controllers.AdminApi
                 return BadRequest(new[] { $"Loại ảnh không hợp lệ, chỉ nhận: {string.Join(", ", ImageFolders.All)}." });
             }
 
-            var error = ValidateFile(file, _settings.AllowImageFileTypes, _settings.MaxImageSizeInMB);
+            var error = file.Validate(_settings.AllowImageFileTypes, _settings.MaxImageSizeInMB);
             if (error != null)
             {
                 return BadRequest(new[] { error });
@@ -74,28 +75,6 @@ namespace SoundSpace.Api.Controllers.AdminApi
             }
 
             return NoContent();
-        }
-
-        // Kiểm tra đuôi file và dung lượng, trả về thông báo lỗi hoặc null nếu hợp lệ.
-        private static string? ValidateFile(IFormFile file, string allowFileTypes, int maxSizeInMB)
-        {
-            var allowedExtensions = allowFileTypes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (!allowedExtensions.Contains(Path.GetExtension(file.FileName).ToLowerInvariant()))
-            {
-                return $"Chỉ nhận file {string.Join(", ", allowedExtensions)}.";
-            }
-
-            if (file.Length == 0)
-            {
-                return "File rỗng.";
-            }
-
-            if (file.Length > maxSizeInMB * 1024L * 1024L)
-            {
-                return $"File tối đa {maxSizeInMB} MB.";
-            }
-
-            return null;
         }
     }
 }
