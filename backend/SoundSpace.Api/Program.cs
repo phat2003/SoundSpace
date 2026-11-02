@@ -11,7 +11,9 @@ using SoundSpace.Api.Services;
 using SoundSpace.Core.ConfigOptions;
 using SoundSpace.Core.Domain.Identity;
 using SoundSpace.Core.Models.Auth;
+using SoundSpace.Core.SeedWorks;
 using SoundSpace.Data;
+using SoundSpace.Data.SeedWorks;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
 using System.Text;
@@ -129,6 +131,9 @@ builder.Services.AddSingleton<IAmazonS3>(sp =>
     });
 });
 builder.Services.AddScoped<IFileStorageService, R2FileStorageService>();
+
+// Repository + UnitOfWork (theo TeduBlog): controller đọc / ghi database qua IUnitOfWork.
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 //Default config for ASP.NET Core
 builder.Services.AddControllers();

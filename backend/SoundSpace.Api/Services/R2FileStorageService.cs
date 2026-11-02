@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Options;
 using SoundSpace.Core.ConfigOptions;
+using SoundSpace.Core.Models.Player;
 
 namespace SoundSpace.Api.Services
 {
@@ -30,6 +31,21 @@ namespace SoundSpace.Api.Services
         {
             var key = await UploadAsync(_settings.ImageBucketName, folder, content, fileName, cancellationToken);
             return ImageUrlPrefix + key;
+        }
+
+        public async Task<AudioStreamDto> GetAudioUrlAsync(string key)
+        {
+            // Ký URL ngay trên máy chủ bằng khoá R2, không gọi lên Cloudflare nên rất nhanh.
+            var expiresAt = DateTime.UtcNow.AddMinutes(_settings.AudioUrlExpireInMinutes);
+            var url = await _s3Client.GetPreSignedURLAsync(new GetPreSignedUrlRequest
+            {
+                BucketName = _settings.AudioBucketName,
+                Key = key,
+                Verb = HttpVerb.GET,
+                Expires = expiresAt
+            });
+
+            return new AudioStreamDto { Url = url, ExpiresAt = expiresAt };
         }
 
         public async Task DeleteAudioAsync(string key, CancellationToken cancellationToken = default)
