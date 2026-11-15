@@ -97,6 +97,12 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 ## Lưu ý khi làm việc
 - Luôn đọc CLAUDE.md trước khi bắt đầu bất kỳ task nào
 - Khi báo cáo kết quả sau mỗi task, phần "Đã làm" trình bày bằng bảng 2 cột **File** | **Vai trò** (tên file là link bấm được, vai trò mô tả ngắn file đó làm gì), bên dưới bảng có phần **Giải thích ngắn** bằng lời dễ hiểu cho người mới: vì sao làm như vậy, điểm khác so với code tham khảo (nếu có), các con số/cấu hình được chọn và lý do.
+- **BẮT BUỘC sau mỗi task có viết/sửa code**: trong báo cáo kết quả, ngay sau phần **Giải thích ngắn** và trước bảng test, phải có mục **Luồng xử lý** mô tả task chạy thế nào từ đầu đến cuối. Không được bỏ qua kể cả khi task nhỏ (task nhỏ thì luồng ngắn 2–3 bước). Cách viết:
+  - Đánh số từng bước theo đúng thứ tự xảy ra khi chạy thật: người dùng thao tác gì → frontend (component / service nào) → request nào (method + URL) → backend (controller → service / repository nào) → database / Cloudflare R2 → dữ liệu trả về → giao diện thay đổi ra sao.
+  - Mỗi bước ghi rõ tên file hoặc tên hàm đang xử lý (dạng link bấm được nếu là file), kèm 1 câu giải thích bằng lời dễ hiểu cho người mới.
+  - Có nhánh lỗi quan trọng (dữ liệu không hợp lệ, chưa đăng nhập / không đủ quyền, không tìm thấy, lỗi R2…) thì liệt kê riêng sau luồng chính: điều kiện → kết quả trả về.
+  - Luồng có từ 4 bước trở lên hoặc đi qua nhiều tầng (FE ↔ BE ↔ DB/R2) thì thêm sơ đồ `mermaid` (`sequenceDiagram` hoặc `flowchart`) phía trên danh sách bước.
+  - Task chỉ sửa tài liệu / cấu hình, không có code chạy thì ghi một dòng "Luồng xử lý: không có (task chỉ sửa tài liệu/cấu hình)".
 - Khi không chắc → hỏi trước, không tự ý sửa
 - Ưu tiên sửa từng page một, không sửa nhiều file cùng lúc
 - Phần test (như là test API, chức năng,... không được tự ý test): hãy thêm Cách test thủ công (nếu là API thì test trên swagger) vào giữa cột Trường hợp và Kết quả test để tôi có thể biết cách test và tự mình test thủ công.

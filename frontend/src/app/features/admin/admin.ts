@@ -4,6 +4,6 @@ import { PagePlaceholder } from '../../shared/components/page-placeholder/page-p
 @Component({
   selector: 'app-admin',
   imports: [PagePlaceholder],
-  template: `<app-page-placeholder title="Quản trị" icon="admin_panel_settings" />`,
+  template: `<app-page-placeholder title="Tổng quan quản trị" icon="dashboard" />`,
 })
 export class Admin {}
