@@ -59,8 +59,7 @@ export const routes: Routes = [
       {
         path: 'admin',
         canActivate: [adminGuard],
-        title: 'Quản trị · SoundSpace',
-        loadComponent: () => import('./features/admin/admin').then((m) => m.Admin),
+        loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },
       {
         path: 'login',

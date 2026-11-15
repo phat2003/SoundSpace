@@ -146,7 +146,7 @@ Giao diện được thiết kế bằng Google Stitch: tông tối, điểm nh�
 - [x] Khởi tạo repo, dự án Angular và ASP.NET Core Web API
 - [x] Layout chung: sidebar, header, khung thanh player, routing
 - [x] Kết nối PostgreSQL (Neon), EF Core, migration đầu tiên
-- [ ] Đăng ký, đăng nhập, JWT, phân quyền
+- [x] Đăng ký, đăng nhập, JWT, phân quyền
 - [ ] Trang quản trị: thể loại, nghệ sĩ, album, bài hát (upload lên Cloudflare R2)
 - [ ] Trình phát nhạc: phát thật, hàng chờ, trộn bài, lặp lại, đếm lượt nghe
 - [ ] Khám phá, tìm kiếm, trang bài hát chia sẻ được
