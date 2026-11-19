@@ -30,14 +30,14 @@ namespace SoundSpace.Data.SeedWorks
             return _dbSet.Where(expression);
         }
 
-        public async Task<IEnumerable<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _dbSet.ToListAsync();
+            return await _dbSet.ToListAsync(cancellationToken);
         }
 
-        public async Task<T?> GetByIdAsync(Key id)
+        public async Task<T?> GetByIdAsync(Key id, CancellationToken cancellationToken = default)
         {
-            return await _dbSet.FindAsync(id);
+            return await _dbSet.FindAsync([id], cancellationToken);
         }
 
         public void Remove(T entity)
