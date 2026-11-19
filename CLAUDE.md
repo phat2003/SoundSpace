@@ -86,6 +86,7 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 - Các code nào đã được viết sẵn trong dự án(có thể là code tham khảo từ project khác hoặc đại loại vậy,...) nhưng chưa phù hợp với dự án thì hãy refactoring lại cho phù hợp. Còn code nào đã có sẵn trong dự án và hoạt động ổn định rồi thì đừng thay đổi nó nếu không cần thiết
 - Khi một trang/tính năng nào đó chỉ cần hiển thị một vài data của một bảng nào đó mà không phải hiển thị đầy đủ data trong bảng thì hãy tạo các DTO trong thư mục Models và dùng AutoMapper. Nhớ tạo thư mục và đặt tên tương ứng với chức năng mà cần tới DTO đó của bảng.
 - Đặt tên biến/hàm rõ ràng, có comment chỗ phức tạp
+- **Async/Await:** Tất cả thao tác I/O (DB, HTTP, File) đều phải `async`, đặt hậu tố `Async` cho tên method và luôn truyền `CancellationToken` xuống các tầng dưới.
 
 ## Quy tắc bắt buộc (KHÔNG được vi phạm)
 - ❌ KHÔNG xóa mock data khi chưa có API thật
@@ -107,3 +108,8 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 - Ưu tiên sửa từng page một, không sửa nhiều file cùng lúc
 - Phần test (như là test API, chức năng,... không được tự ý test): hãy thêm Cách test thủ công (nếu là API thì test trên swagger) vào giữa cột Trường hợp và Kết quả test để tôi có thể biết cách test và tự mình test thủ công.
 - Thông thường khi làm một task mới/phát triển tính năng mới thì sẽ tạo một nhánh mới. Trường hợp nếu nhánh mới chưa được tạo và vẫn đang ở trên nhánh cũ thì bạn hãy hỏi trước khi làm bằng câu hỏi có tạo nhánh mới hay không, nếu nhánh mới đã được tạo và đang ở trên nhánh mới rồi thì hãy thực hiện mệnh lệnh được yêu cầu.
+
+## Quy tắc ghi log (AI Logging Rules)
+- **Ghi log tự động:** Sau khi hoàn thành một tính năng, sửa lỗi phức tạp, hoặc khi người dùng gõ `/log`, hãy tự động cập nhật tiến độ vào đầu file `AI_LOG.md` ở thư mục gốc.
+- Format mỗi lần ghi log gồm: `[Ngày hiện tại] - Tên task`, danh sách file đã tạo/sửa, lý do thay đổi kỹ thuật, Lưu ý kỹ thuật / Migration, Checklist [x] Các việc đã thực hiện và các việc cần làm tiếp theo (Next steps). Chi tiết format nằm trong log.md
+- Giữ nội dung ngắn gọn, đi thẳng vào kỹ thuật, không viết dài dòng.

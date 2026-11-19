@@ -1,0 +1,16 @@
+## [2026-11-18] - API CRUD thể loại (nhánh feature/genre-crud-api)
+- **Thay đổi:**
+  - Mới: `Core/Models/Catalog/GenreDto.cs`, `CreateUpdateGenreRequest.cs`; `Core/IRepositories/IGenreRepository.cs`; `Data/Repositories/GenreRepository.cs`; `Api/Controllers/AdminApi/GenreController.cs`.
+  - Sửa: `Core/SeedWorks/IRepository.cs`, `Data/SeedWorks/RepositoryBase.cs` (thêm `CancellationToken` cho `GetByIdAsync`/`GetAllAsync`); `IUnitOfWork`/`UnitOfWork` (thêm `Genres`, `CompleteAsync(CancellationToken)`, UnitOfWork nhận thêm `IMapper`).
+- **Quyết định kỹ thuật / Fix lỗi:**
+  - Theo `PostCategoryController` của TeduBlog: paging, get all, get by id, POST, PUT, DELETE nhiều id (`?ids=`).
+  - Khác TeduBlog: PUT dùng route `{id}`; slug kiểm tra trùng + regex; POST/PUT trả `GenreDto`; lỗi trả mảng chuỗi tiếng Việt.
+  - Không xoá thể loại còn bài hát (FK Restrict) → 400, khuyên ẩn bằng `IsActive`.
+  - Đổi/bỏ ảnh bìa hoặc xoá thể loại thì xoá ảnh cũ trên R2 sau khi lưu DB (lỗi chỉ ghi log).
+  - Sắp xếp theo `SortOrder` rồi `Name`, tìm theo tên bằng `ILike`.
+- **Lưu ý kỹ thuật / Migration:** Không có migration, không thêm package/config. `SongRepository`/`SongController` chưa truyền `CancellationToken` (giữ nguyên code ổn định).
+- **Checklist [x] Các việc đã thực hiện:**
+  - [x] Repository + DTO + controller thể loại
+  - [x] `dotnet build` thành công (0 warning)
+  - [ ] Người dùng tự test trên Swagger, commit + PR
+- **Next steps:** Giao diện CRUD thể loại ở `/admin/genres` (dùng `DataTable`, `Pagination`, upload ảnh qua `api/admin/media/image?type=genres`).
