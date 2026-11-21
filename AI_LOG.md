@@ -1,3 +1,20 @@
+## [2026-11-20] - Giao diện quản lý thể loại (nhánh feature/genre-manage-interface)
+- **Thay đổi:**
+  - Mới: `features/admin/genres/genre-list.ts` (trang /admin/genres), `genre-form-dialog.ts` (thêm/sửa); `shared/components/confirm-dialog/confirm-dialog.ts`; `core/admin/genre-admin.service.ts`, `media-admin.service.ts`; `core/models/genre.ts`; `shared/utils/slugify.ts` (+ spec), `validate-image.ts`.
+  - Sửa: `features/admin/admin.routes.ts` (route genres dùng GenreList); `features/settings/avatar-form.ts` (dùng `validate-image.ts` chung).
+- **Quyết định kỹ thuật / Fix lỗi:**
+  - Stitch chưa có màn quản lý thể loại → bảng theo màn "Quản trị" (cột Thao tác sửa/xoá), form theo phong cách trang Cài đặt.
+  - Hộp thoại dùng `<dialog>` gốc (`showModal`): tự giữ focus, Esc đóng; trang cha bật/tắt bằng `@if`.
+  - Slug tự sinh theo tên (bỏ dấu tiếng Việt) cho tới khi admin tự gõ slug; khi sửa giữ slug cũ.
+  - Ảnh bìa upload ngay khi chọn (`POST api/admin/media/image?type=genres`); huỷ form / đổi ảnh khác / bỏ ảnh thì xoá ảnh vừa upload chưa lưu (`DELETE api/admin/media/image`). Ảnh cũ đã lưu do API PUT tự xoá.
+  - Lỗi NG8022: không đặt thuộc tính `min`/`max` trên input có `[formField]` (Signal Forms tự gắn từ validator).
+- **Lưu ý kỹ thuật / Migration:** Không có. Chưa chạy `npx ng test` cho `slugify.spec.ts` (người dùng tự test).
+- **Checklist [x] Các việc đã thực hiện:**
+  - [x] Trang danh sách + tìm kiếm + phân trang, form thêm/sửa, xoá có xác nhận
+  - [x] `npm run build` thành công
+  - [ ] Người dùng tự test, commit + PR
+- **Next steps:** API CRUD nghệ sĩ (dùng lại ConfirmDialog, MediaAdminService, slugify).
+
 ## [2026-11-18] - API CRUD thể loại (nhánh feature/genre-crud-api)
 - **Thay đổi:**
   - Mới: `Core/Models/Catalog/GenreDto.cs`, `CreateUpdateGenreRequest.cs`; `Core/IRepositories/IGenreRepository.cs`; `Data/Repositories/GenreRepository.cs`; `Api/Controllers/AdminApi/GenreController.cs`.

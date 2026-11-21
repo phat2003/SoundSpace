@@ -97,6 +97,11 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
 - 🔄 Tất cả các page đều đang trong quá trình phát triển
 ## Lưu ý khi làm việc
 - Luôn đọc CLAUDE.md trước khi bắt đầu bất kỳ task nào
+- Khi không chắc → hỏi trước, không tự ý sửa
+- Ưu tiên sửa từng page một, không sửa nhiều file cùng lúc
+- Khi phát triển một tính năng mà giao diện mẫu(stitch) chưa có màn riêng cho tính năng đó thì hãy ngừng làm task đó và báo cáo rằng chưa có màn hình mẫu liên quan đến feature đó trong giao diện mẫu và cần bổ sung để hoàn thành task.
+
+## Báo cáo sau khi làm xong
 - Khi báo cáo kết quả sau mỗi task, phần "Đã làm" trình bày bằng bảng 2 cột **File** | **Vai trò** (tên file là link bấm được, vai trò mô tả ngắn file đó làm gì), bên dưới bảng có phần **Giải thích ngắn** bằng lời dễ hiểu cho người mới: vì sao làm như vậy, điểm khác so với code tham khảo (nếu có), các con số/cấu hình được chọn và lý do.
 - **BẮT BUỘC sau mỗi task có viết/sửa code**: trong báo cáo kết quả, ngay sau phần **Giải thích ngắn** và trước bảng test, phải có mục **Luồng xử lý** mô tả task chạy thế nào từ đầu đến cuối. Không được bỏ qua kể cả khi task nhỏ (task nhỏ thì luồng ngắn 2–3 bước). Cách viết:
   - Đánh số từng bước theo đúng thứ tự xảy ra khi chạy thật: người dùng thao tác gì → frontend (component / service nào) → request nào (method + URL) → backend (controller → service / repository nào) → database / Cloudflare R2 → dữ liệu trả về → giao diện thay đổi ra sao.
@@ -104,10 +109,9 @@ Người nghe: đăng ký/đăng nhập (JWT), nghe nhạc với player cố đ�
   - Có nhánh lỗi quan trọng (dữ liệu không hợp lệ, chưa đăng nhập / không đủ quyền, không tìm thấy, lỗi R2…) thì liệt kê riêng sau luồng chính: điều kiện → kết quả trả về.
   - Luồng có từ 4 bước trở lên hoặc đi qua nhiều tầng (FE ↔ BE ↔ DB/R2) thì thêm sơ đồ `mermaid` (`sequenceDiagram` hoặc `flowchart`) phía trên danh sách bước.
   - Task chỉ sửa tài liệu / cấu hình, không có code chạy thì ghi một dòng "Luồng xử lý: không có (task chỉ sửa tài liệu/cấu hình)".
-- Khi không chắc → hỏi trước, không tự ý sửa
-- Ưu tiên sửa từng page một, không sửa nhiều file cùng lúc
 - Phần test (như là test API, chức năng,... không được tự ý test): hãy thêm Cách test thủ công (nếu là API thì test trên swagger) vào giữa cột Trường hợp và Kết quả test để tôi có thể biết cách test và tự mình test thủ công.
 - Thông thường khi làm một task mới/phát triển tính năng mới thì sẽ tạo một nhánh mới. Trường hợp nếu nhánh mới chưa được tạo và vẫn đang ở trên nhánh cũ thì bạn hãy hỏi trước khi làm bằng câu hỏi có tạo nhánh mới hay không, nếu nhánh mới đã được tạo và đang ở trên nhánh mới rồi thì hãy thực hiện mệnh lệnh được yêu cầu.
+- Đưa báo cáo vào file markdown theo đường dẫn: "D:\obsidian\personalproject\SoundSpace\Task" tìm và viết vào cuối file của task cha mà tôi điền tên theo trong Notion.
 
 ## Quy tắc ghi log (AI Logging Rules)
 - **Ghi log tự động:** Sau khi hoàn thành một tính năng, sửa lỗi phức tạp, hoặc khi người dùng gõ `/log`, hãy tự động cập nhật tiến độ vào đầu file `AI_LOG.md` ở thư mục gốc.
