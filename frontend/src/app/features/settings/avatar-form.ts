@@ -4,22 +4,12 @@ import { AuthService } from '../../core/auth/auth.service';
 import { getApiErrors } from '../../core/http/api-error';
 import { Profile } from '../../core/models/profile';
 import { ProfileService } from '../../core/profile/profile.service';
+import {
+  IMAGE_EXTENSIONS,
+  MAX_IMAGE_SIZE_MB,
+  validateImage,
+} from '../../shared/utils/validate-image';
 import { FormAlert } from '../auth/form-alert';
-
-// Giống MediaSettings của backend (AllowImageFileTypes, MaxImageSizeInMB) để báo lỗi ngay, đỡ upload thừa.
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp'];
-const MAX_SIZE_MB = 5;
-
-const validateImage = (file: File): string | null => {
-  const extension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
-  if (!ALLOWED_EXTENSIONS.includes(extension)) {
-    return 'Chỉ nhận ảnh JPG, PNG hoặc WEBP.';
-  }
-  if (file.size > MAX_SIZE_MB * 1024 * 1024) {
-    return `Ảnh tối đa ${MAX_SIZE_MB} MB.`;
-  }
-  return null;
-};
 
 /** Khối "Ảnh đại diện": chọn ảnh là upload luôn (PUT /api/profile/avatar), ảnh cũ do API tự xoá. */
 @Component({
@@ -87,8 +77,8 @@ export class AvatarForm {
   /** Báo cho trang cha hồ sơ mới sau khi đổi ảnh thành công. */
   readonly profileChange = output<Profile>();
 
-  protected readonly accept = ALLOWED_EXTENSIONS.join(',');
-  protected readonly maxSizeMb = MAX_SIZE_MB;
+  protected readonly accept = IMAGE_EXTENSIONS.join(',');
+  protected readonly maxSizeMb = MAX_IMAGE_SIZE_MB;
   protected readonly uploading = signal(false);
   protected readonly errors = signal<string[]>([]);
   protected readonly saved = signal(false);

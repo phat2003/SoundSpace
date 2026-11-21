@@ -16,8 +16,7 @@ export const adminRoutes: Routes = [
   {
     path: 'genres',
     title: 'Quản lý thể loại · SoundSpace',
-    loadComponent: placeholder,
-    data: { title: 'Thể loại', icon: 'category' },
+    loadComponent: () => import('./genres/genre-list').then((m) => m.GenreList),
   },
   {
     path: 'artists',
