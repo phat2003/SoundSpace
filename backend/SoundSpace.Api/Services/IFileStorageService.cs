@@ -17,5 +17,9 @@ namespace SoundSpace.Api.Services
 
         // Trả về false nếu URL không thuộc bucket ảnh (ví dụ link ảnh bên ngoài) nên không có gì để xoá.
         Task<bool> DeleteImageAsync(string imageUrl, CancellationToken cancellationToken = default);
+
+        // Dọn các ảnh không còn dùng sau khi database đã lưu xong (đổi ảnh, xoá bản ghi).
+        // Bỏ qua null; lỗi chỉ ghi log, không ném ra ngoài vì dữ liệu chính đã lưu thành công.
+        Task DeleteUnusedImagesAsync(IEnumerable<string?> imageUrls);
     }
 }

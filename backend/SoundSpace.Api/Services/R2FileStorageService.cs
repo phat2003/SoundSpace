@@ -15,11 +15,29 @@ namespace SoundSpace.Api.Services
 
         private readonly IAmazonS3 _s3Client;
         private readonly R2StorageSettings _settings;
+        private readonly ILogger<R2FileStorageService> _logger;
 
-        public R2FileStorageService(IAmazonS3 s3Client, IOptions<R2StorageSettings> settings)
+        public R2FileStorageService(IAmazonS3 s3Client, IOptions<R2StorageSettings> settings, ILogger<R2FileStorageService> logger)
         {
             _s3Client = s3Client;
             _settings = settings.Value;
+            _logger = logger;
+        }
+
+        public async Task DeleteUnusedImagesAsync(IEnumerable<string?> imageUrls)
+        {
+            foreach (var imageUrl in imageUrls.OfType<string>().Distinct())
+            {
+                try
+                {
+                    // Không nhận CancellationToken: request có bị huỷ thì vẫn nên dọn xong ảnh rác.
+                    await DeleteImageAsync(imageUrl, CancellationToken.None);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Không xoá được ảnh {ImageUrl} trên R2", imageUrl);
+                }
+            }
         }
 
         public Task<string> UploadAudioAsync(Stream content, string fileName, CancellationToken cancellationToken = default)

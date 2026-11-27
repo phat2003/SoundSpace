@@ -19,17 +19,14 @@ namespace SoundSpace.Api.Controllers.AdminApi
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IFileStorageService _fileStorageService;
-        private readonly ILogger<GenreController> _logger;
 
         public GenreController(IUnitOfWork unitOfWork,
             IMapper mapper,
-            IFileStorageService fileStorageService,
-            ILogger<GenreController> logger)
+            IFileStorageService fileStorageService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _fileStorageService = fileStorageService;
-            _logger = logger;
         }
 
         [HttpGet("paging")]
@@ -95,9 +92,9 @@ namespace SoundSpace.Api.Controllers.AdminApi
             await _unitOfWork.CompleteAsync(cancellationToken);
 
             // Đổi / bỏ ảnh bìa thì xoá ảnh cũ trên R2 để không để lại file rác.
-            if (oldCoverImageUrl != null && oldCoverImageUrl != genre.CoverImageUrl)
+            if (oldCoverImageUrl != genre.CoverImageUrl)
             {
-                await TryDeleteImageAsync(oldCoverImageUrl);
+                await _fileStorageService.DeleteUnusedImagesAsync([oldCoverImageUrl]);
             }
 
             return Ok(_mapper.Map<GenreDto>(genre));
@@ -131,26 +128,9 @@ namespace SoundSpace.Api.Controllers.AdminApi
             _unitOfWork.Genres.RemoveRange(genres);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
-            foreach (var coverImageUrl in genres.Select(x => x.CoverImageUrl).OfType<string>())
-            {
-                await TryDeleteImageAsync(coverImageUrl);
-            }
+            await _fileStorageService.DeleteUnusedImagesAsync(genres.Select(x => x.CoverImageUrl));
 
             return NoContent();
-        }
-
-        // Database đã lưu xong nên xoá ảnh lỗi chỉ ghi log, không báo lỗi cho admin
-        // (ảnh không thuộc bucket của SoundSpace thì DeleteImageAsync tự bỏ qua).
-        private async Task TryDeleteImageAsync(string imageUrl)
-        {
-            try
-            {
-                await _fileStorageService.DeleteImageAsync(imageUrl, CancellationToken.None);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Không xoá được ảnh thể loại {ImageUrl}", imageUrl);
-            }
         }
     }
 }
