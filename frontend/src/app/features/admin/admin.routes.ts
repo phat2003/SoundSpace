@@ -21,8 +21,18 @@ export const adminRoutes: Routes = [
   {
     path: 'artists',
     title: 'Quản lý nghệ sĩ · SoundSpace',
-    loadComponent: placeholder,
-    data: { title: 'Nghệ sĩ', icon: 'mic' },
+    loadComponent: () => import('./artists/artist-list').then((m) => m.ArtistList),
+  },
+  {
+    path: 'artists/new',
+    title: 'Thêm nghệ sĩ · SoundSpace',
+    loadComponent: () => import('./artists/artist-form').then((m) => m.ArtistForm),
+  },
+  {
+    // :id được gán vào input id của ArtistForm (withComponentInputBinding).
+    path: 'artists/:id/edit',
+    title: 'Sửa nghệ sĩ · SoundSpace',
+    loadComponent: () => import('./artists/artist-form').then((m) => m.ArtistForm),
   },
   {
     path: 'albums',

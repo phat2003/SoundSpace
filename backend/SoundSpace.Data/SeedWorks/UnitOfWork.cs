@@ -12,10 +12,12 @@ namespace SoundSpace.Data.SeedWorks
         public UnitOfWork(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
+            Artists = new ArtistRepository(context, mapper);
             Genres = new GenreRepository(context, mapper);
             Songs = new SongRepository(context);
         }
 
+        public IArtistRepository Artists { get; private set; }
         public IGenreRepository Genres { get; private set; }
         public ISongRepository Songs { get; private set; }
 
